@@ -13,6 +13,7 @@
 
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
+#![cfg_attr(feature = "alloc", no_std)]
 
 #[cfg(feature = "graphql_query_derive")]
 #[allow(unused_imports)]
@@ -37,11 +38,16 @@ use std::collections::BTreeMap;
 use std::fmt::{self, Display, Write};
 
 #[cfg(feature = "alloc")]
+#[macro_use]
 extern crate alloc;
 #[cfg(feature = "alloc")]
-use alloc::collections::BTreeMap;
-#[cfg(feature = "alloc")]
-use alloc::fmt::{self, Display, Write};
+use alloc::{
+    collections::BTreeMap,
+    fmt::{self, Display, Write},
+    string::{String, ToString},
+    vec::{Vec},
+    borrow::ToOwned,
+};
 
 /// A convenience trait that can be used to build a GraphQL request body.
 ///
