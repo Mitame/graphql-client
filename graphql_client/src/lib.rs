@@ -31,8 +31,17 @@ pub use graphql_query_derive::*;
 pub mod reqwest;
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+#[cfg(not(feature = "alloc"))]
+use std::collections::BTreeMap;
+#[cfg(not(feature = "alloc"))]
 use std::fmt::{self, Display, Write};
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+#[cfg(feature = "alloc")]
+use alloc::collections::BTreeMap;
+#[cfg(feature = "alloc")]
+use alloc::fmt::{self, Display, Write};
 
 /// A convenience trait that can be used to build a GraphQL request body.
 ///
@@ -202,7 +211,7 @@ pub struct Error {
     /// Which path in the query the error applies to, e.g. `["users", 0, "email"]`.
     pub path: Option<Vec<PathFragment>>,
     /// Additional errors. Their exact format is defined by the server.
-    pub extensions: Option<HashMap<String, serde_json::Value>>,
+    pub extensions: Option<BTreeMap<String, serde_json::Value>>,
 }
 
 impl Display for Error {
@@ -296,7 +305,7 @@ pub struct Response<Data> {
     pub errors: Option<Vec<Error>>,
     /// Additional extensions. Their exact format is defined by the server.
     /// See [GraphQL Response Specification](https://github.com/graphql/graphql-spec/blob/main/spec/Section%207%20--%20Response.md#response-format)
-    pub extensions: Option<HashMap<String, serde_json::Value>>,
+    pub extensions: Option<BTreeMap<String, serde_json::Value>>,
 }
 
 /// Hidden module for types used by the codegen crate.
@@ -378,7 +387,7 @@ mod tests {
 
         let deserialized_error: Error = serde_json::from_value(err).unwrap();
 
-        let mut expected_extensions = HashMap::new();
+        let mut expected_extensions = BTreeMap::new();
         expected_extensions.insert("code".to_owned(), json!("CAN_NOT_FETCH_BY_ID"));
         expected_extensions.insert("timestamp".to_owned(), json!("Fri Feb 9 14:33:09 UTC 2018"));
         let expected_extensions = Some(expected_extensions);
